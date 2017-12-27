@@ -1,0 +1,42 @@
+{% extends 'core/base.html' %}
+{% block content %}
+				<div class="panel-body">
+					<fieldset>
+						<legend>Enviar mensagem</legend>
+						<h3>{{status_message}}</h3>
+						<form action="{% url 'sendmessage' %}" id="sendMessageForm" method="post">
+							{% csrf_token %}
+							<div class="row">
+								<div class="form-group col-md-2">
+									<label>Assunto:</label>
+									<textarea form="sendMessageForm" name="title" rows="2" cols="50" maxlength="25" style="resize:none; overflow:hidden;"  required></textarea>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="form-group col-md-2">
+									<label>Mensagem:</label>
+									<textarea form="sendMessageForm" name="body" rows="2" cols="50" maxlength="200" style="resize:none; overflow:hidden;" required></textarea><br/>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="form-group col-md-4">
+									<label>Destino:</label>
+									<br/>
+									<input id="broadcastradio" type="radio" name="target" value="broadcast" checked/> Toda a rede
+									<br/><br/>
+									<input id="multicastradio" type="radio" name="target" value="multicast"/> Endereço específico ou lista de endereços<br/><br/>
+
+									<label id="labeltarget" style="color:red"> IP único ou lista de IP`s separado por vírgulas(ex: 192.168.0.23,192.168.0.100 ...)</label>
+									<textarea id="texttarget" form="sendMessageForm" name="enderecos" rows="2" cols="50" maxlength="200" style="resize:none; overflow:hidden;"></textarea>
+							</div>
+								</div>
+									<br/>
+									<br/>
+									<button type="submit" class="btn btn-success btn-sm" title="Fazer Login" form="sendMessageForm">Enviar</button>
+									</form>
+									</fieldset>
+								</div>
+
+{% endblock %}

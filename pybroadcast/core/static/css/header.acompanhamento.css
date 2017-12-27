@@ -1,0 +1,31 @@
+/*
+ Formatação dos menus
+ */
+.logo-sistema {
+    /* Nome do sistema, em fonte verde com sombra preta */
+    float: left;
+    font-family: 'Myriad Pro', 'DejaVu Sans', 'FreeSans', Arial, Helvetica, sans-serif;
+    font-size: 32px;
+    color: #7CB30F;
+    text-shadow: 2px 2px 1px rgba(0, 0, 0, 0.7);
+    margin-top: -12px;
+}
+.logo-divisor {
+    /* Divisória entre o nome do sistema e a descrição */
+    float: left;
+    box-shadow: 1px 0 0 white;
+    border-right: 1px solid #aaa;
+    height: 28px;
+    width: 2px;
+    margin: 0 7px;
+}
+.logo-descricao {
+    /* Descrição do sistema, em azul com sombra borrada */
+    float: left;
+    color: #999;
+    font-family: Arial, serif;
+    font-size: 18px;
+    /*font-weight: bold;*/
+    /*text-shadow: 1px 1px 1px rgba(0,0,0,0.7);*/
+    line-height: 32px;
+}

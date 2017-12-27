@@ -1,0 +1,75 @@
+{% extends 'core/base.html' %}
+{% block content %}
+				<!-- <div class="alert alert-warning" role="alert">Alerta!</div> -->
+				<h2>{{status_message}}</h2>
+				<div class="panel-body">
+					<div id="tabs">
+						<ul>
+							<li><a href="#tabs-1">Histórico de Mensagens</a></li>
+						    <li><a href="#tabs-2">Histórico de Operações Administrativas</a></li>
+						</ul>
+
+					  <div id="tabs-1">
+					  	<fieldset>
+							<legend>Histórico de Mensagens</legend>
+						</fieldset>
+
+						<div class="row">
+							<div class="col-sm-12">
+								<table class="table table-condensed table-bordered">
+									<thead>
+										<tr>
+											<th>Usuário</th>
+											<th>Data e Hora</th>
+											<th>Título</th>
+											<th>Mensagem</th>
+										</tr>
+									</thead>
+									<tbody>
+									{% for i in history_queryset %}
+										<tr class="success">
+											<td>{{i.usuario|upper}}({{i.lotacao|upper}})</td>
+											<td>{{i.timestamp}}</td>
+											<td>{{i.titulo_mensagem}}</td>
+											<td>{{i.conteudo_mensagem|linebreaks}}</td>
+										</tr>
+									{% endfor %}
+									</tbody>
+								</table>
+							</div><!-- end div.col-sm-12 -->
+						</div><!-- end div.row -->
+					  </div>
+
+					  <div id="tabs-2">
+
+						<legend>Histórico de Operações</legend>
+						<div class="row">
+							<div class="col-sm-12">
+								<table class="table table-condensed table-bordered">
+									<thead>
+										<tr>
+											<th>Usuário</th>
+											<th>IP</th>
+											<th>Data e Hora</th>
+											<th>Operação</th>
+
+										</tr>
+									</thead>
+									<tbody>
+									{% for j in operation_history %}
+										<tr class="success">
+											<td>{{j.usuario|upper}}({{j.lotacao|upper}})</td>
+											<td>{{j.ip}}</td>
+											<td>{{j.timestamp}}</td>
+											<td>{{j.descricao|linebreaks}}</td>
+										</tr>
+									{% endfor %}
+									</tbody>
+								</table>
+							</div><!-- end div.col-sm-12 -->
+						</div><!-- end div.row -->
+					  </div>
+					</div>
+				</div>
+
+{% endblock %}

@@ -1,0 +1,110 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>PyBroadcast - Notificações Urgentes</title>
+
+		<!-- Bootstrap CSS -->
+		<link rel="stylesheet" href="//cdn.conab.gov.br/bootstrap/3/css/bootstrap-3.2.0.min.css">
+		<!-- Pacote de ícones em forma de fonte. Tem que ser usado localmente -->
+		<!-- (não está funcionando com o caminho absoluto do servidor de protótipos) -->
+		<link rel="stylesheet" href="//cdn.conab.gov.br/bootstrap/3/css/font-awesome-4.2.0.min.css">
+
+		<!-- CSS de customização dos componentes de tela -->
+		<link rel="stylesheet" href="//cdn.conab.gov.br/bootstrap/3/css/conab-cabecalho.css">
+		<link rel="stylesheet" href="//cdn.conab.gov.br/bootstrap/3/css/conab-migalha-de-pao.css">
+		<link rel="stylesheet" href="//cdn.conab.gov.br/bootstrap/3/css/conab-bootstrap.css">
+
+		<link rel="stylesheet" href="{% static 'css/jquery-ui.min.css' %}">
+		<link rel="stylesheet" href="{% static 'css/pybroadcast.css' %}">
+		<link rel="stylesheet" href="{% static 'css/jquery-ui.theme.min.css' %}">
+		<link rel="stylesheet" href="{% static 'css/jquery-ui.structure.min.css' %}">
+
+		<!-- Latest compiled and minified JavaScript -->
+		<script src="//cdn.conab.gov.br/bootstrap/3/js/jquery-2.1.1.min.js"></script>
+		<script src="//cdn.conab.gov.br/bootstrap/3/js/bootstrap-3.2.0.min.js"></script>
+
+
+
+	</head>
+
+	<body style="background: #EEE;">
+
+		<div class="container">
+			<!-- Cabeçalho -->
+			<div class="row" style="margin: 10px 0">
+				<div class="col-sm-8 col-xs-12" style="position: relative; top: 10px">
+					<div class="logo-sistema">PyBroadcast</div>
+					<div class="logo-divisor"></div>
+					<div class="logo-descricao">Sistema de<br/>Envio de Notificações Urgentes</div>
+				</div>
+
+				<div class="col-sm-4 hidden-xs text-right">
+					<img src="//cdn.conab.gov.br/bootstrap/3/img/logo-conab.png"/>
+				</div>
+			</div>
+
+			<!-- Navbar primária -->
+			<nav class="navbar navbar-primaria" role="navigation">
+				<div class="container-fluid">
+					<div class="navbar-header">
+						<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse" style="border: 1px solid white">
+							<i class="fa fa-align-justify fa-fw"></i>
+						</button>
+					</div>
+					<div class="navbar-collapse collapse">
+					{% if user.is_authenticated %}
+						<!-- Itens da direita -->
+						<p class="navbar-text navbar-right">
+							<strong>{{nome_completo}} - IP: {{remote_addr}}</strong>
+							(<a href="{% url 'logout' %}">Sair</a>)
+						</p>
+					{% endif %}
+					</div>
+				</div>
+			</nav>
+
+
+			<div class="panel panel-default panel-sombra" style="box-shadow: 0 0 15px #999;">
+				<div class="panel-heading">
+					<!-- Breadcrumb -->
+					<ol class="breadcrumb">
+
+					{% if user.is_authenticated %}
+						<li>
+							<a href="{% url 'home' %}"><i class="fa fa-fw"></i>Home</a>
+						</li>
+						<li>
+							<a href="{% url 'configuracoes' %}"><i class="fa fa-fw"></i>Configurações</a>
+						</li>
+						<li>
+							<a href="{% url 'historico' %}"><i class="fa fa-fw"></i>Histórico</a>
+						</li>
+						<li>
+							<a href="{% url 'about' %}"><i class="fa fa-fw"></i>Sobre o Sistema</a>
+						</li>
+					{% else %}
+						<li>
+							<a href="{% url 'login' %}"><i class="fa fa-fw"></i>Login</a>
+						</li>
+						<li>
+							<a href="{% url 'about' %}"><i class="fa fa-fw"></i>Sobre o Sistema</a>
+						</li>
+					{% endif %}
+					</ol>
+				</div>
+		   {% block content %}
+
+		   {% endblock %}
+			</div>
+		</div>
+		<script type="text/javascript" src="{% static 'js/jquery-3.2.1.min.js' %}"></script>
+		<script type="text/javascript" src="{% static 'js/jquery-ui.min.js' %}"></script>
+		<script type="text/javascript" src="{% static 'js/funcoes_apoio.js' %}"></script>
+	</body>
+</html>

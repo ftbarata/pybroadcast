@@ -1,0 +1,33 @@
+/*
+Folha de estilo do acompanhamento.
+*/
+body table {
+	font-size: 12px;
+}
+
+/* Cabeçalho da tabela */
+.table > thead:first-child > tr:first-child > th {
+	background: linear-gradient(#FFF, #CCC);
+}
+
+/* Linha de avisos da tabela */
+.table > tbody > tr.success > td {
+	background-color: #CEED9F;
+}
+.table > tbody > tr.warning > td {
+	background-color: #FAF682;
+}
+.table > tbody > tr.danger > td {
+	background-color: #FFCCBD;
+}
+.table > tbody > tr.active > td {
+	background-color: #E6E8E6;
+}
+
+/* Mouse over na tabela */
+table#leilao > tbody > tr:hover > td,
+table#leilao > tbody > tr.warning:hover > td,
+table#leilao > tbody > tr.danger:hover > td,
+table#leilao > tbody > tr.success:hover > td {
+	cursor: pointer;
+}

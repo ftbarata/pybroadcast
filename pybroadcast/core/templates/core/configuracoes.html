@@ -1,0 +1,72 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block content %}
+
+<h2>{{status_message}}</h2>
+<div class="panel-body">
+       <div id="tabs">
+            <ul>
+                <li><a href="#tabs-1">Adicionar </a></li>
+                <li><a href="#tabs-2">Usuários Autorizados</a></li>
+            </ul>
+
+           <div id="tabs-1">
+                <fieldset>
+                    <legend>Autorizar Usuário</legend>
+                    <form action="{% url 'configuracoes' %}" id="configForm" method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <!--<div class="form-group col-md-2">-->
+                            <br/>
+                            <div>
+                                <label>Usuario (Apenas Login):</label>
+                                <br/>
+                                <textarea form="configForm" id="adduserform" name="usuario" rows="1" cols="30" maxlength="25" style="resize:none; overflow:hidden;"  required></textarea>
+                                <i class="fa fa-check" id="checked"></i>
+                            </div>
+                        </div>
+                        <br/>
+                        <br/>
+                        <button type="submit" class="btn btn-success btn-sm" title="Adicionar" form="configForm">Adicionar</button>
+                    </form>
+                </fieldset>
+           </div>
+
+           <div id="tabs-2">
+
+               <fieldset>
+                    <legend>Usuários Autorizados</legend>
+                </fieldset>
+
+						<div class="row">
+							<div class="col-sm-12">
+								<table class="table table-condensed table-bordered">
+									<thead>
+										<tr>
+                                            <th>Usuário</th>
+											<th>Lotação</th>
+                                            <th>Adicionado em</th>
+                                            <th>Adicionado por</th>
+											<th>Remover</th>
+										</tr>
+									</thead>
+									<tbody>
+									{% for i in usuarios_autorizados %}
+										<tr class="success">
+											<td>{{i.usuario|upper}}</td>
+                                            <td>{{i.lotacao|upper}}</td>
+                                            <td>{{i.timestamp}}</td>
+                                            <td>{{i.adicionado_por|upper}}</td>
+                                            <td class="text-center"><a href="{% url 'deleteauthorizeduser' id=i.id %}"><i class="fa fa-times vermelho tamanhoclose"></i></a></td>
+										</tr>
+									{% endfor %}
+									</tbody>
+								</table>
+							</div><!-- end div.col-sm-12 -->
+                        </div>
+           </div>
+    </div>
+</div>
+
+
+{% endblock %}

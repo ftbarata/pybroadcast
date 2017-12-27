@@ -1,0 +1,32 @@
+{% extends 'core/base.html' %}
+{% block content %}
+
+				<!-- <div class="alert alert-warning" role="alert">Alerta!</div> -->
+
+				<div class="panel-body">
+					<fieldset>
+						<legend>Acesso ao Sistema</legend>
+						<h3>{{status_message}}</h3>
+						<form action="{% url 'login' %}" id="loginForm" method="post">
+							{% csrf_token %}
+							<div class="row">
+								<div class="form-group col-md-2">
+									<label>Login:</label>
+									<input type="text" class="form-control" title="Login de rede (não inserir e-mail)" name="username" required>
+									<br>
+									<label>Senha:</label>
+									<input type="password" class="form-control" title="Senha" name="password" required/>
+									<br>
+									<br>
+									<button type="submit" class="btn btn-success btn-sm" title="Fazer Login" form="loginForm">Login
+								</button>
+								</div>
+							</div>
+						</form>
+					</fieldset>
+
+					<br/>
+
+
+				</div><!-- end div.panel-body -->
+{% endblock %}
