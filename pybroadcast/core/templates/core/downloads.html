@@ -1,0 +1,22 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block content %}
+
+				<div class="panel-body">
+					<fieldset>
+						<legend>Downloads</legend>
+							<div class="row">
+								<h2>Os executáveis abaixo não são instaladores. São programas autocontidos que são carregados em memória.</h2>
+								<h3><a href="{% static 'downloads/pybroadcast_client.exe' %}"><img src="{% static 'img/download_production.ico' %}" height="30" alt="Versão de produção / background">pybroadcast_client.exe (Versão de produção / background)</a></h3>
+								<h4>Esta versão, ao ser executada, é carregada na memória RAM, sendo executada em background.</h4>
+								<h4>Esta é a versão correta para ser utilizada nas máquinas, e a execução será feita automaticamente pelo WPKG.</h4>
+								<h3><a href="{% static 'downloads/pybroadcast_client_debug.exe'%}"><img src="{% static 'img/download_debug.ico' %}" height="30" alt="Versão de debug / foreground" >pybroadcast_client_debug.exe (Versão de debug / foreground)</a></h3>
+								<h4>Esta versão deverá ser executada, via CMD, para debug de eventuais problemas.</h4>
+							</div>
+					</fieldset>
+
+					<br/>
+
+
+				</div><!-- end div.panel-body -->
+{% endblock %}

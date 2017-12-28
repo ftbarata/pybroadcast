@@ -88,6 +88,9 @@
 						<li>
 							<a href="{% url 'about' %}"><i class="fa fa-fw"></i>Sobre o Sistema</a>
 						</li>
+						<li>
+							<a href="{% url 'downloads' %}"><i class="fa fa-fw"></i>Downloads</a>
+						</li>
 					{% else %}
 						<li>
 							<a href="{% url 'login' %}"><i class="fa fa-fw"></i>Login</a>
@@ -95,11 +98,23 @@
 						<li>
 							<a href="{% url 'about' %}"><i class="fa fa-fw"></i>Sobre o Sistema</a>
 						</li>
+						<li>
+							<a href="{% url 'downloads' %}"><i class="fa fa-fw"></i>Downloads</a>
+						</li>
 					{% endif %}
 					</ol>
 				</div>
-				<h4>{{alert_message}}</h4>
-				<h4>{{status_message}}</h4>
+				{% if alert_message %}
+					<div class="alert alert-danger" role="alert">
+						<h3>{{alert_message}}</h3>
+					</div>
+				{% endif %}
+
+				{% if status_message %}
+					<div class="alert alert-success" role="alert">
+						<h3>{{status_message}}</h3>
+					</div>
+				{% endif %}
 		   {% block content %}
 
 		   {% endblock %}

@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.contrib.auth.models import Permission, User
+from django.contrib.auth.models import User, Permission
 from .helper_functions import login_user, logout_user, _publish, _sendHistory, _getUserFromSessionId, _getTopicFromSender, _addAuthorizedUser, _deleteAuthorizedUser, _get_ldap_user_attrs_as_dict_of_lists
 from .models import SendMessageHistory, OperationLog, UsuariosAutorizados
 import os
@@ -60,6 +60,7 @@ def sendMessage(request):
         else:
             body = message
         lotacao = request.session['lotacao']
+        estado_lotacao = str(_get_ldap_user_attrs_as_dict_of_lists(username=request.user, attr_list=['st'])['st'][0]).upper()
         username = str(_getUserFromSessionId(request)['username'])
         nome_completo = request.session['nome_completo']
 
@@ -69,7 +70,7 @@ def sendMessage(request):
         if send_message_perm:
 
             if _publish(username=username,message='{}[$$]{}'.format(title, body)):
-                _sendHistory(usuario=username,ip=remote_addr, lotacao=lotacao, titulo_mensagem=title, mensagem=body)
+                _sendHistory(usuario=username,ip=remote_addr, lotacao=lotacao, estado_lotacao=estado_lotacao, titulo_mensagem=title, mensagem=body)
                 return render(request, 'core/home.html', {'status_message':'Mensagem Enviada.','nome_completo': nome_completo, 'remote_addr': remote_addr})
             else:
                 return render(request, 'core/home.html', {'status_message': 'Erro de cruzamento de dados cadastrais. Por favor, verifique seus dados de lotação no RH.', 'nome_completo': nome_completo, 'remote_addr': remote_addr})
@@ -83,8 +84,9 @@ def historico(request):
     if request.user.is_authenticated:
         remote_addr = request.META['REMOTE_ADDR']
         lotacao = request.session['lotacao']
+        estado_lotacao = str(_get_ldap_user_attrs_as_dict_of_lists(username=request.user, attr_list=['st'])['st'][0]).upper()
         nome_completo = request.session['nome_completo']
-        history_queryset = SendMessageHistory.objects.all().filter(lotacao=lotacao).order_by('-timestamp')
+        history_queryset = SendMessageHistory.objects.all().filter(estado_lotacao__iexact=estado_lotacao).order_by('-timestamp')
         operation_queryset = OperationLog.objects.all().filter(lotacao=lotacao).order_by('-timestamp')
 
         return render(request, 'core/historico.html', {'history_queryset': history_queryset, 'nome_completo':nome_completo, 'lotacao': lotacao, 'operation_history': operation_queryset, 'remote_addr': remote_addr})
@@ -124,7 +126,8 @@ def teste(request,username):
 
 def configuracoes(request):
     if request.user.is_authenticated:
-        usuarios_autorizados = UsuariosAutorizados.objects.all()
+        estado_lotacao = str(_get_ldap_user_attrs_as_dict_of_lists(username=request.user, attr_list=['st'])['st'][0]).upper()
+        usuarios_autorizados = UsuariosAutorizados.objects.all().filter(estado_lotacao__iexact=estado_lotacao)
         lotacao = request.session['lotacao']
         remote_addr = request.META['REMOTE_ADDR']
         nome_completo = request.session['nome_completo']
@@ -132,21 +135,22 @@ def configuracoes(request):
             return render(request, 'core/configuracoes.html', {'remote_addr': remote_addr, 'nome_completo': nome_completo, 'usuarios_autorizados': usuarios_autorizados})
         else:
             usuario = request.POST['usuario']
+            estado_lotacao_new_user = str(_get_ldap_user_attrs_as_dict_of_lists(username=usuario, attr_list=['st'])['st'][0]).upper()
             adicionado_por = request.user
             edit_authorized_perm = User.objects.get(username=adicionado_por).user_permissions.filter(codename='edit_authorized').exists()
 
             if not User.objects.all().filter(username=usuario).exists():
                 return render(request, 'core/configuracoes.html',{'usuarios_autorizados': usuarios_autorizados, 'remote_addr': remote_addr,'nome_completo': nome_completo,'alert_message': 'Usuário {} deve fazer o primeiro acesso ao sistema para ser adicionado na lista de autorizados.'.format(usuario.upper())})
 
-            edit_authorized_perm_new_user = User.objects.get(username=usuario).user_permissions.filter(codename='edit_authorized')
-            send_message_perm_new_user = User.objects.get(username=usuario).user_permissions.filter(codename='edit_authorized')
+            edit_authorized_perm_new_user = Permission.objects.get(codename='edit_authorized')
+            send_message_perm_new_user = Permission.objects.get(codename='send_message')
             if edit_authorized_perm:
-                if _addAuthorizedUser(username=usuario,adicionado_por=adicionado_por, ip=remote_addr, lotacao_username=lotacao) == 'ok':
+                if _addAuthorizedUser(username=usuario,adicionado_por=adicionado_por, ip=remote_addr, lotacao_username=lotacao, estado_lotacao=estado_lotacao, estado_lotacao_new_user=estado_lotacao_new_user) == 'ok':
                     User.objects.get(username=usuario).user_permissions.add(edit_authorized_perm_new_user, send_message_perm_new_user)
                     return render(request, 'core/configuracoes.html', {'status_message': 'Usuário adicionado.', 'usuarios_autorizados': usuarios_autorizados, 'remote_addr': remote_addr, 'nome_completo': nome_completo})
-                elif _addAuthorizedUser(username=usuario,adicionado_por=adicionado_por, ip=remote_addr, lotacao_username=lotacao) == 'jaexiste':
+                elif _addAuthorizedUser(username=usuario,adicionado_por=adicionado_por, ip=remote_addr, lotacao_username=lotacao, estado_lotacao_new_user=estado_lotacao_new_user) == 'jaexiste':
                     return render(request, 'core/configuracoes.html', {'status_message': 'Erro ao adicionar: Usuário já está autorizado.', 'usuarios_autorizados': usuarios_autorizados, 'remote_addr': remote_addr, 'nome_completo': nome_completo})
-                elif _addAuthorizedUser(username=usuario, adicionado_por=adicionado_por, ip=remote_addr, lotacao_username=lotacao) == 'naoexistenoldap':
+                elif _addAuthorizedUser(username=usuario, adicionado_por=adicionado_por, ip=remote_addr, lotacao_username=lotacao, estado_lotacao_new_user=estado_lotacao_new_user) == 'naoexistenoldap':
                     return render(request, 'core/configuracoes.html', {'status_message': 'Erro ao adicionar: Usuário não encontrado no Ldap.','usuarios_autorizados': usuarios_autorizados, 'remote_addr': remote_addr,'nome_completo': nome_completo})
             else:
                 return render(request, 'core/configuracoes.html',{'usuarios_autorizados': usuarios_autorizados, 'remote_addr': remote_addr,'nome_completo': nome_completo, 'alert_message':'Você não tem permissão para editar autorizados.'})
@@ -179,3 +183,7 @@ def deleteAuthorizedUser(request, id):
 def ajaxRequestLdapUser(request, username):
     usernames = _get_ldap_user_attrs_as_dict_of_lists(username, ['uid'], like_sql_like=True)
     return render(request,'core/ajax.html', {'result': usernames})
+
+
+def downloads(request):
+    return render(request, 'core/downloads.html')

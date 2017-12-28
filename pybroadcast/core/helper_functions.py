@@ -50,8 +50,8 @@ def logout_user(request):
     return True
 
 
-def _sendHistory(usuario, ip, lotacao,titulo_mensagem,mensagem):
-    SendMessageHistory.objects.create(usuario=usuario,ip=ip, lotacao=lotacao, titulo_mensagem=titulo_mensagem, conteudo_mensagem=mensagem)
+def _sendHistory(usuario, ip, lotacao, estado_lotacao, titulo_mensagem,mensagem):
+    SendMessageHistory.objects.create(usuario=usuario,ip=ip, lotacao=lotacao, estado_lotacao=estado_lotacao,titulo_mensagem=titulo_mensagem, conteudo_mensagem=mensagem)
 
 
 def _getUserFromSessionId(request):
@@ -63,8 +63,8 @@ def _getUserFromSessionId(request):
     return {'username': user_from_session_id, 'fullname':fullname}
 
 
-def _insertOpLog(usuario, ip,lotacao,descricao):
-    OperationLog.objects.create(usuario=usuario, ip=ip, lotacao=lotacao, descricao=descricao)
+def _insertOpLog(usuario, ip,lotacao, estado_lotacao,descricao):
+    OperationLog.objects.create(usuario=usuario, ip=ip, lotacao=lotacao, estado_lotacao=estado_lotacao, descricao=descricao)
 
 def _getUFbyLotacao(lotacao):
     return lotacao[0:2].lower()
@@ -108,14 +108,14 @@ def _getTopicFromSender(username):
         return None
 
 
-def _addAuthorizedUser(username, adicionado_por, ip, lotacao_username):
+def _addAuthorizedUser(username, adicionado_por, ip, lotacao_username, estado_lotacao,estado_lotacao_new_user):
     if UsuariosAutorizados.objects.filter(usuario=username).exists():
         return 'jaexiste'
     else:
         try:
             lotacao = _get_ldap_user_attrs_as_dict_of_lists(username, ['l'])['l'][0]
-            UsuariosAutorizados.objects.create(usuario=username, lotacao=lotacao, adicionado_por=adicionado_por)
-            _insertOpLog(usuario=adicionado_por,ip=ip, lotacao=lotacao_username,descricao='Adicionou {} aos usuários autorizados.'.format(str(username).upper()))
+            UsuariosAutorizados.objects.create(usuario=username, lotacao=lotacao, adicionado_por=adicionado_por, estado_lotacao=estado_lotacao_new_user)
+            _insertOpLog(usuario=adicionado_por,ip=ip, lotacao=lotacao_username,estado_lotacao=estado_lotacao,descricao='Adicionou {} aos usuários autorizados.'.format(str(username).upper()))
             return 'ok'
         except TypeError:
             return 'naoexistenoldap'
@@ -124,11 +124,12 @@ def _addAuthorizedUser(username, adicionado_por, ip, lotacao_username):
 def _deleteAuthorizedUser(removido_por, ip, lotacao_username, id):
     if UsuariosAutorizados.objects.filter(pk=id).exists():
         username = UsuariosAutorizados.objects.get(pk=id)
+        estado_lotacao = str(_get_ldap_user_attrs_as_dict_of_lists(username=removido_por, attr_list=['st'])['st'][0]).upper()
         edit_authorized_perm = Permission.objects.get(codename='edit_authorized')
         send_message_perm = Permission.objects.get(codename='send_message')
         User.objects.get(username=username).user_permissions.remove(edit_authorized_perm, send_message_perm)
         UsuariosAutorizados.objects.filter(pk=id).delete()
-        _insertOpLog(usuario=removido_por, ip=ip, lotacao=lotacao_username,descricao='Removeu {} dos usuários autorizados.'.format(str(username).upper()))
+        _insertOpLog(usuario=removido_por, ip=ip, lotacao=lotacao_username,estado_lotacao=estado_lotacao,descricao='Removeu {} dos usuários autorizados.'.format(str(username).upper()))
         return True
     else:
         return False
