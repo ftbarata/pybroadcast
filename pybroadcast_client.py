@@ -5,8 +5,8 @@ import urllib.request as request
 import tkinter as tk
 import tkinter.messagebox as tkMessageBox
 
-URL_GET_REVERSE_DNS='http://10.1.20.175:8000/reversedns'
-SERVER='10.1.20.175'
+URL_GET_REVERSE_DNS='http://10.1.0.127/reversedns'
+SERVER='10.1.0.127'
 USERNAME='pybroadcast'
 PASSWORD='!#@-pybroadcast'
 
@@ -98,7 +98,7 @@ try:
     client.connect(SERVER, 1883, 60)
     reversename = getReverseAddress()
     channel = getSubChannel(reversename)
-
+    print(channel)
     # Blocking call that processes network traffic, dispatches callbacks and
     # handles reconnecting.
     # Other loop*() functions are available that give a threaded interface and a

@@ -15,12 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from pybroadcast.core.views import home, login, logout, about, sendMessage, historico, getReverseDns,teste, configuracoes, deleteAuthorizedUser, ajaxRequestLdapUser
+from pybroadcast.core.views import home, login, logout, about, sendMessage, historico, getReverseDns,teste, configuracoes, deleteAuthorizedUser, ajaxRequestLdapUser,downloads
 
 
 urlpatterns = [
     path('', home, name='home'),
     path('login/', login, name='login'),
+    path('downloads/', downloads, name='downloads'),
     path('sendmessage/', sendMessage, name='sendmessage'),
     path('logout/', logout, name='logout'),
     path('sobre/', about, name='about'),
