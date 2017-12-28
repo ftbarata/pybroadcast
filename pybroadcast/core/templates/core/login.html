@@ -6,7 +6,6 @@
 				<div class="panel-body">
 					<fieldset>
 						<legend>Acesso ao Sistema</legend>
-						<h3>{{status_message}}</h3>
 						<form action="{% url 'login' %}" id="loginForm" method="post">
 							{% csrf_token %}
 							<div class="row">

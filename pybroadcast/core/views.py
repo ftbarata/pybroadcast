@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.contrib.auth.models import Permission, User
 from .helper_functions import login_user, logout_user, _publish, _sendHistory, _getUserFromSessionId, _getTopicFromSender, _addAuthorizedUser, _deleteAuthorizedUser, _get_ldap_user_attrs_as_dict_of_lists
 from .models import SendMessageHistory, OperationLog, UsuariosAutorizados
 import os
@@ -18,8 +19,14 @@ def login(request):
         if not request.user.is_authenticated:
             if login_user(request):
                 nome_completo = request.session['nome_completo']
+                usuario = User.objects.get(username=request.user)
+                send_message_perm = usuario.user_permissions.filter(codename='send_message').exists()
+                edit_authorized_perm = usuario.user_permissions.filter(codename='edit_authorized').exists()
                 remote_addr = request.META['REMOTE_ADDR']
-                return render(request, 'core/home.html', {'nome_completo': nome_completo, 'remote_addr': remote_addr})
+                if send_message_perm and edit_authorized_perm:
+                    return render(request, 'core/home.html', {'nome_completo': nome_completo, 'remote_addr': remote_addr})
+                else:
+                    return render(request, 'core/home.html',{'nome_completo': nome_completo, 'remote_addr': remote_addr, 'alert_message': 'Atenção, você não tem permissão para enviar mensagem e editar autorizados'})
             else:
                 return render(request, 'core/login.html', {'status_message': 'Login ou senha incorreta.'})
         else:
@@ -56,11 +63,18 @@ def sendMessage(request):
         username = str(_getUserFromSessionId(request)['username'])
         nome_completo = request.session['nome_completo']
 
-        if _publish(username=username,message='{}[$$]{}'.format(title, body)):
-            _sendHistory(usuario=username,ip=remote_addr, lotacao=lotacao, titulo_mensagem=title, mensagem=body)
-            return render(request, 'core/home.html', {'status_message':'Mensagem Enviada.','nome_completo': nome_completo, 'remote_addr': remote_addr})
+        usuario = User.objects.get(username=request.user)
+        send_message_perm = usuario.user_permissions.filter(codename='send_message').exists()
+
+        if send_message_perm:
+
+            if _publish(username=username,message='{}[$$]{}'.format(title, body)):
+                _sendHistory(usuario=username,ip=remote_addr, lotacao=lotacao, titulo_mensagem=title, mensagem=body)
+                return render(request, 'core/home.html', {'status_message':'Mensagem Enviada.','nome_completo': nome_completo, 'remote_addr': remote_addr})
+            else:
+                return render(request, 'core/home.html', {'status_message': 'Erro de cruzamento de dados cadastrais. Por favor, verifique seus dados de lotação no RH.', 'nome_completo': nome_completo, 'remote_addr': remote_addr})
         else:
-            return render(request, 'core/home.html', {'status_message': 'Erro de cruzamento de dados cadastrais. Por favor, verifique seus dados de lotação no RH.', 'nome_completo': nome_completo, 'remote_addr': remote_addr})
+            return render(request, 'core/home.html',{'nome_completo': nome_completo, 'remote_addr': remote_addr, 'alert_message': 'Você não tem permissão para enviar mensagens.'})
     else:
         return render(request, 'core/login.html', {'status_message': 'Acesso negado. Faça o login primeiro.'})
 
@@ -119,12 +133,24 @@ def configuracoes(request):
         else:
             usuario = request.POST['usuario']
             adicionado_por = request.user
-            if _addAuthorizedUser(username=usuario,adicionado_por=adicionado_por, ip=remote_addr, lotacao_username=lotacao) == 'ok':
-                return render(request, 'core/configuracoes.html', {'status_message': 'Usuário adicionado.', 'usuarios_autorizados': usuarios_autorizados, 'remote_addr': remote_addr, 'nome_completo': nome_completo})
-            elif _addAuthorizedUser(username=usuario,adicionado_por=adicionado_por, ip=remote_addr, lotacao_username=lotacao) == 'jaexiste':
-                return render(request, 'core/configuracoes.html', {'status_message': 'Erro ao adicionar: Usuário já está autorizado.', 'usuarios_autorizados': usuarios_autorizados, 'remote_addr': remote_addr, 'nome_completo': nome_completo})
-            elif _addAuthorizedUser(username=usuario, adicionado_por=adicionado_por, ip=remote_addr, lotacao_username=lotacao) == 'naoexistenoldap':
-                return render(request, 'core/configuracoes.html', {'status_message': 'Erro ao adicionar: Usuário não encontrado no Ldap.','usuarios_autorizados': usuarios_autorizados, 'remote_addr': remote_addr,'nome_completo': nome_completo})
+            edit_authorized_perm = User.objects.get(username=adicionado_por).user_permissions.filter(codename='edit_authorized').exists()
+
+            if not User.objects.all().filter(username=usuario).exists():
+                return render(request, 'core/configuracoes.html',{'usuarios_autorizados': usuarios_autorizados, 'remote_addr': remote_addr,'nome_completo': nome_completo,'alert_message': 'Usuário {} deve fazer o primeiro acesso ao sistema para ser adicionado na lista de autorizados.'.format(usuario.upper())})
+
+            edit_authorized_perm_new_user = User.objects.get(username=usuario).user_permissions.filter(codename='edit_authorized')
+            send_message_perm_new_user = User.objects.get(username=usuario).user_permissions.filter(codename='edit_authorized')
+            if edit_authorized_perm:
+                if _addAuthorizedUser(username=usuario,adicionado_por=adicionado_por, ip=remote_addr, lotacao_username=lotacao) == 'ok':
+                    User.objects.get(username=usuario).user_permissions.add(edit_authorized_perm_new_user, send_message_perm_new_user)
+                    return render(request, 'core/configuracoes.html', {'status_message': 'Usuário adicionado.', 'usuarios_autorizados': usuarios_autorizados, 'remote_addr': remote_addr, 'nome_completo': nome_completo})
+                elif _addAuthorizedUser(username=usuario,adicionado_por=adicionado_por, ip=remote_addr, lotacao_username=lotacao) == 'jaexiste':
+                    return render(request, 'core/configuracoes.html', {'status_message': 'Erro ao adicionar: Usuário já está autorizado.', 'usuarios_autorizados': usuarios_autorizados, 'remote_addr': remote_addr, 'nome_completo': nome_completo})
+                elif _addAuthorizedUser(username=usuario, adicionado_por=adicionado_por, ip=remote_addr, lotacao_username=lotacao) == 'naoexistenoldap':
+                    return render(request, 'core/configuracoes.html', {'status_message': 'Erro ao adicionar: Usuário não encontrado no Ldap.','usuarios_autorizados': usuarios_autorizados, 'remote_addr': remote_addr,'nome_completo': nome_completo})
+            else:
+                return render(request, 'core/configuracoes.html',{'usuarios_autorizados': usuarios_autorizados, 'remote_addr': remote_addr,'nome_completo': nome_completo, 'alert_message':'Você não tem permissão para editar autorizados.'})
+
     else:
         return render(request, 'core/login.html', {'status_message': 'Acesso negado. Faça o login primeiro.'})
 
@@ -136,8 +162,16 @@ def deleteAuthorizedUser(request, id):
         nome_completo = request.session['nome_completo']
         removido_por = request.user
         lotacao = request.session['lotacao']
-        if _deleteAuthorizedUser(removido_por=removido_por,ip=remote_addr, lotacao_username=lotacao, id=id):
-            return render(request, 'core/configuracoes.html',{'remote_addr': remote_addr, 'nome_completo': nome_completo,'usuarios_autorizados': usuarios_autorizados, 'status_message': 'Usuário removido.'})
+        usuario = User.objects.get(username=request.user)
+        edit_authorized_perm = usuario.user_permissions.filter(codename='edit_authorized').exists()
+
+        if edit_authorized_perm:
+            if _deleteAuthorizedUser(removido_por=removido_por,ip=remote_addr, lotacao_username=lotacao, id=id):
+                return render(request, 'core/configuracoes.html',{'remote_addr': remote_addr, 'nome_completo': nome_completo,'usuarios_autorizados': usuarios_autorizados, 'status_message': 'Usuário removido.'})
+            else:
+                return render(request, 'core/configuracoes.html',{'remote_addr': remote_addr, 'nome_completo': nome_completo,'usuarios_autorizados': usuarios_autorizados, 'status_message': 'Erro ao remover usuário.'})
+        else:
+            return render(request, 'core/configuracoes.html',{'remote_addr': remote_addr, 'nome_completo': nome_completo,'usuarios_autorizados': usuarios_autorizados, 'status_message': 'Usuário removido.', 'alert_message':'Você não tem permissão para editar usuários autorizados.'})
     else:
         return render(request, 'core/login.html', {'status_message': 'Acesso negado. Faça o login primeiro.'})
 

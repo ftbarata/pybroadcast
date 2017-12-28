@@ -3,7 +3,6 @@
 				<div class="panel-body">
 					<fieldset>
 						<legend>Enviar mensagem</legend>
-						<h3>{{status_message}}</h3>
 						<form action="{% url 'sendmessage' %}" id="sendMessageForm" method="post">
 							{% csrf_token %}
 							<div class="row">

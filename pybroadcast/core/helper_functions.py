@@ -1,4 +1,5 @@
 import paho.mqtt.client as mqtt
+from django.contrib.auth.models import Permission
 from .models import SendMessageHistory, OperationLog, UsuariosAutorizados
 from django.contrib.sessions.models import Session
 from django.contrib.auth.models import User
@@ -120,10 +121,12 @@ def _addAuthorizedUser(username, adicionado_por, ip, lotacao_username):
             return 'naoexistenoldap'
 
 
-
 def _deleteAuthorizedUser(removido_por, ip, lotacao_username, id):
     if UsuariosAutorizados.objects.filter(pk=id).exists():
         username = UsuariosAutorizados.objects.get(pk=id)
+        edit_authorized_perm = Permission.objects.get(codename='edit_authorized')
+        send_message_perm = Permission.objects.get(codename='send_message')
+        User.objects.get(username=username).user_permissions.remove(edit_authorized_perm, send_message_perm)
         UsuariosAutorizados.objects.filter(pk=id).delete()
         _insertOpLog(usuario=removido_por, ip=ip, lotacao=lotacao_username,descricao='Removeu {} dos usuários autorizados.'.format(str(username).upper()))
         return True

@@ -12,6 +12,10 @@ class SendMessageHistory(models.Model):
     class Meta:
         verbose_name = 'Histórico de Mensagens'
         verbose_name_plural = 'Históricos de Mensagens'
+        permissions = (
+            ("send_message", "Pode enviar mensagens"),
+        )
+
 
     def __str__(self):
         return str(self.usuario) + ' ' + str(self.timestamp)
@@ -41,6 +45,10 @@ class UsuariosAutorizados(models.Model):
     class Meta:
         verbose_name = 'Usuário autorizado'
         verbose_name_plural = 'Usuários autorizados'
+        permissions = (
+            ("edit_authorized", "Pode adicionar/remover usuários autorizados"),
+
+        )
 
     def __str__(self):
         return str(self.usuario)
