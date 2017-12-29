@@ -115,7 +115,7 @@ def _addAuthorizedUser(username, adicionado_por, ip, lotacao_username, estado_lo
         try:
             lotacao = _get_ldap_user_attrs_as_dict_of_lists(username, ['l'])['l'][0]
             UsuariosAutorizados.objects.create(usuario=username, lotacao=lotacao, adicionado_por=adicionado_por, estado_lotacao=estado_lotacao_new_user)
-            _insertOpLog(usuario=adicionado_por,ip=ip, lotacao=lotacao_username,estado_lotacao=estado_lotacao,descricao='Adicionou {} aos usuários autorizados.'.format(str(username).upper()))
+            _insertOpLog(usuario=adicionado_por,ip=ip, lotacao=lotacao_username,estado_lotacao=estado_lotacao,descricao='Adicionou {}({}) aos usuários autorizados.'.format(str(username).upper(),str(lotacao).upper()))
             return 'ok'
         except TypeError:
             return 'naoexistenoldap'
