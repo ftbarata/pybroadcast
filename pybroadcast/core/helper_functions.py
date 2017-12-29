@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from ldap3 import Server, Connection, ALL
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
+import os
 
 
 def _get_ldap_user_attrs_as_dict_of_lists(username, attr_list=['l'], like_sql_like = False):
@@ -85,7 +86,7 @@ def _publish(username, message, hostname=settings.BROKER_SERVER):
         return False
 
 
-def _getTopicFromSender(username):
+def _getTopicFromSender(username, remote_addr):
     try:
         state = _get_ldap_user_attrs_as_dict_of_lists(username, ['st'])['st'][0]
     except TypeError:
@@ -97,7 +98,32 @@ def _getTopicFromSender(username):
             if 'BRASILIA' in str(description).upper() and 'BSB' in str(lotacao).upper():
                 return 'ua/brasilia'
             else:
-                return 'ua/{}'.format(state)
+                if len(remote_addr) <= 15:
+                    octets_list = remote_addr.split('.')
+                    prefix = ''
+                    position = 0
+                    for i in octets_list:
+                        if position < 2:
+                            prefix += i + '.'
+                            position += 1
+                    if octets_list[2] == '1' or octets_list[2] == '2':
+                        prefix += '0.'
+                    else:
+                        prefix += octets_list[2] + '.'
+                    final_ip = prefix + '8'
+                    reverse = os.popen('host -t txt {}'.format(final_ip)).read()
+                    if 'NXDOMAIN' not in reverse:
+                        reverse_ip_list = str(reverse).split(' ')
+                        name = str(reverse_ip_list[len(reverse_ip_list) - 1]).lower().replace('.conab.gov.br.', '')
+                        if 'sureg' in name.lower():
+                            return 'sureg/' + name[len(name) - 2:]
+                        elif 'ua' in name.lower():
+                            return 'ua/' + name[2:]
+                        elif name.lower() == 'df':
+                            return 'df/matriz'
+                        elif name.lower() == 'false':
+                            return False
+
         elif 'DF-SUREG-E-ENTORNO' in str(lotacao).upper():
             return 'sureg/df'
         elif 'DF-SUREG-E-ENTORNO' not in str(lotacao).upper() and state.lower() == 'df':

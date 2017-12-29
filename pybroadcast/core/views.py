@@ -64,7 +64,7 @@ def sendMessage(request):
         estado_lotacao = str(_get_ldap_user_attrs_as_dict_of_lists(username=request.user, attr_list=['st'])['st'][0]).upper()
         username = str(_getUserFromSessionId(request)['username'])
         nome_completo = request.session['nome_completo']
-
+        topic = _getTopicFromSender(username=username)
         usuario = User.objects.get(username=request.user)
         send_message_perm = usuario.user_permissions.filter(codename='send_message').exists()
 
@@ -72,7 +72,7 @@ def sendMessage(request):
 
             if _publish(username=username,message='{}[$$]{}'.format(title, body)):
                 _sendHistory(usuario=username,ip=remote_addr, lotacao=lotacao, estado_lotacao=estado_lotacao, titulo_mensagem=title, mensagem=body)
-                return render(request, 'core/home.html', {'status_message':'Mensagem Enviada.','nome_completo': nome_completo, 'remote_addr': remote_addr})
+                return render(request, 'core/home.html', {'status_message':'Mensagem Enviada. Tópico: {}'.format(topic),'nome_completo': nome_completo, 'remote_addr': remote_addr})
             else:
                 return render(request, 'core/home.html', {'status_message': 'Erro de cruzamento de dados cadastrais. Por favor, verifique seus dados de lotação no RH.', 'nome_completo': nome_completo, 'remote_addr': remote_addr})
         else:
@@ -105,21 +105,15 @@ def getReverseDns(request):
             if position < 2:
                 prefix += i + '.'
                 position += 1
-        print(prefix)
-
         if octets_list[2] == '1' or octets_list[2] == '2':
             prefix += '0.'
         else:
             prefix += octets_list[2] + '.'
         final_ip = prefix + '8'
-
-        print(final_ip)
-
         reverse = os.popen('host -t txt {}'.format(final_ip)).read()
         if 'NXDOMAIN' not in reverse:
             reverse_ip_list = str(reverse).split(' ')
             reverse = str(reverse_ip_list[len(reverse_ip_list) - 1]).lower()
-            print(reverse)
             return render(request, 'core/reversedns.html', {'result': reverse.replace('.conab.gov.br.', '')})
         else:
             return render(request, 'core/reversedns.html', {'result': 'df'})
@@ -196,4 +190,9 @@ def ajaxRequestLdapUser(request, username):
 
 
 def downloads(request):
-    return render(request, 'core/downloads.html')
+    if request.user.is_authenticated:
+        remote_addr = request.META['REMOTE_ADDR']
+        nome_completo = request.session['nome_completo']
+        return render(request, 'core/downloads.html', {'remote_addr': remote_addr,'nome_completo':nome_completo})
+    else:
+        return render(request, 'core/downloads.html')
