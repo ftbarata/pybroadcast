@@ -16,8 +16,8 @@ $( document ).ready(function() {
     if($(this).is(":checked")){
         $("#labeltarget").hide();
         $("#texttarget").hide();
-        $("#texttarget").val("")
-        $('#texttarget').prop('required','false');
+        $("#texttarget").val("");
+        $('#texttarget').removeAttr('required');
         }
     })
     $( "#adduserform" ).autocomplete({
