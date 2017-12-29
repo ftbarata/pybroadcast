@@ -134,7 +134,7 @@ def teste(request,username):
 def configuracoes(request):
     if request.user.is_authenticated:
         estado_lotacao = str(_get_ldap_user_attrs_as_dict_of_lists(username=request.user, attr_list=['st'])['st'][0]).upper()
-        usuarios_autorizados = UsuariosAutorizados.objects.all().filter(Q(estado_lotacao__iexact=estado_lotacao)|Q(adicionado_por__iexact=request.user))
+        usuarios_autorizados = UsuariosAutorizados.objects.all().filter(Q(estado_lotacao__iexact=estado_lotacao)|Q(adicionado_por__iexact=request.user)).order_by('-timestamp')
         lotacao = request.session['lotacao']
         remote_addr = request.META['REMOTE_ADDR']
         nome_completo = request.session['nome_completo']
