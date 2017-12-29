@@ -11,8 +11,8 @@ $( document ).ready(function() {
         $("#texttarget").show();
         $('#texttarget').prop('required','true');
 
-        $("#texttarget").focusin(function(){
-          $("#texttarget").val("")
+//        $("#texttarget").focusin(function(){
+//          $("#texttarget").val("")
 
         })
 
@@ -26,6 +26,7 @@ $( document ).ready(function() {
     if($(this).is(":checked")){
         $("#labeltarget").hide();
         $("#texttarget").hide();
+        $("#texttarget").val("")
         $('#texttarget').prop('required','false');
         }
     })
