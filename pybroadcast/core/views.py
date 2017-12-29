@@ -103,7 +103,7 @@ def getReverseDns(request):
             if dotcount < 3:
                 if char == '.':
                     dotcount += 1
-                if char == '1' and dotcount == 2:
+                if (char == '1' or char == '2') and dotcount == 2:
                     prefix += '0'
                 else:
                     prefix += char
