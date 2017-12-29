@@ -61,7 +61,7 @@ def getSubChannel(name):
 def on_connect(client, userdata, flags, rc):
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
-    print('Conectado. Topico: {}'.format(channel.lower()))
+    print('Conectado no topico: {}'.format(channel.lower()))
     client.subscribe(channel.lower())
 
 
@@ -69,24 +69,29 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     message = msg.payload.decode()
     if len(message.split('[$$]')) == 2:
+        print('Mensagem com destino BROADCAST recebida: {}'.format(message))
         title = message.split('[$$]')[0]
         body = message.split('[$$]')[1]
         root = tk.Tk()
         root.withdraw()
         tkMessageBox.showwarning(title,body)
+        print('Disparando evento tkMessageBox.showwarning')
     elif len(message.split('[$$]')) > 2:
         title = message.split('[$$]')[0]
         body = message.split('[$$]')[1]
         targets = message.split('[$$]')[2].replace(' ', '').split(',')
+        print('Mensagem com destino MULTICAST({}) recebida: {}'.format(targets,message))
         hostname = socket.gethostname()
         localip = socket.gethostbyname(hostname)
         for i in targets:
             if i == localip:
                 root = tk.Tk()
                 root.withdraw()
+                print('Disparando evento tkMessageBox.showwarning')
                 tkMessageBox.showwarning(title, body)
                 break
 
+print('Iniciando...\nConectando em {}'.format(SERVER))
 
 client = mqtt.Client()
 client.disable_logger()
@@ -98,7 +103,6 @@ try:
     client.connect(SERVER, 1883, 60)
     reversename = getReverseAddress()
     channel = getSubChannel(reversename)
-    print(channel)
     # Blocking call that processes network traffic, dispatches callbacks and
     # handles reconnecting.
     # Other loop*() functions are available that give a threaded interface and a
@@ -112,4 +116,4 @@ except ConnectionRefusedError:
 except ConnectionError:
     print('Erro ao conectar ao Daemon do Mosquitto em {}'.format(SERVER))
 except KeyboardInterrupt:
-    print('Finalizado.')
+    print('CTRL+C pressionado.\nFinalizado.')
