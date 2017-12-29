@@ -67,13 +67,13 @@ def sendMessage(request):
         estado_lotacao = str(_get_ldap_user_attrs_as_dict_of_lists(username=request.user, attr_list=['st'])['st'][0]).upper()
         username = str(_getUserFromSessionId(request)['username'])
         nome_completo = request.session['nome_completo']
-        topic = _getTopicFromSender(username=username)
+        topic = _getTopicFromSender(username=username, remote_addr=remote_addr)
         usuario = User.objects.get(username=request.user)
         send_message_perm = usuario.user_permissions.filter(codename='send_message').exists()
 
         if send_message_perm:
 
-            if _publish(username=username,message='{}[$$]{}'.format(title, body)):
+            if _publish(username=username,message='{}[$$]{}'.format(title, body), remote_addr=remote_addr):
                 _sendHistory(usuario=username,ip=remote_addr, lotacao=lotacao, estado_lotacao=estado_lotacao, titulo_mensagem=title, mensagem=body)
                 return render(request, 'core/home.html', {'status_message':'Mensagem Enviada. Tópico: {}'.format(topic),'nome_completo': nome_completo, 'remote_addr': remote_addr})
             else:

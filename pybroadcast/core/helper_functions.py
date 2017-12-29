@@ -71,8 +71,8 @@ def _getUFbyLotacao(lotacao):
     return lotacao[0:2].lower()
 
 
-def _publish(username, message, hostname=settings.BROKER_SERVER):
-    topic = _getTopicFromSender(username)
+def _publish(remote_addr, username, message, hostname=settings.BROKER_SERVER):
+    topic = _getTopicFromSender(username, remote_addr=remote_addr)
     if topic:
         client = mqtt.Client()
         client.disable_logger()

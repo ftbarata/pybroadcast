@@ -4,24 +4,14 @@ $( document ).ready(function() {
   $("#checked").hide();
   $("#tabs").tabs();
 
-
   $("#multicastradio").click(function() {
     if($(this).is(":checked")){
         $("#labeltarget").show();
         $("#texttarget").show();
         $('#texttarget').prop('required','true');
+        }
 
-//        $("#texttarget").focusin(function(){
-//          $("#texttarget").val("")
-
-        })
-
-
-       }
-    })
-
-
-
+       })
   $("#broadcastradio").click(function() {
     if($(this).is(":checked")){
         $("#labeltarget").hide();
@@ -30,8 +20,6 @@ $( document ).ready(function() {
         $('#texttarget').prop('required','false');
         }
     })
-
-
     $( "#adduserform" ).autocomplete({
        source: function( request, response ) {
         $.ajax({
@@ -51,8 +39,5 @@ $( document ).ready(function() {
         $("#checked").show();
         console.log(ui);
       }
-    });
-
-
-
-})
+    })
+});
