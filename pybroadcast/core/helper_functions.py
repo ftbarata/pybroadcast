@@ -124,12 +124,13 @@ def _addAuthorizedUser(username, adicionado_por, ip, lotacao_username, estado_lo
 def _deleteAuthorizedUser(removido_por, ip, lotacao_username, id):
     if UsuariosAutorizados.objects.filter(pk=id).exists():
         username = UsuariosAutorizados.objects.get(pk=id)
+        lotacao = _get_ldap_user_attrs_as_dict_of_lists(username, ['l'])['l'][0]
         estado_lotacao = str(_get_ldap_user_attrs_as_dict_of_lists(username=removido_por, attr_list=['st'])['st'][0]).upper()
         edit_authorized_perm = Permission.objects.get(codename='edit_authorized')
         send_message_perm = Permission.objects.get(codename='send_message')
         User.objects.get(username=username).user_permissions.remove(edit_authorized_perm, send_message_perm)
         UsuariosAutorizados.objects.filter(pk=id).delete()
-        _insertOpLog(usuario=removido_por, ip=ip, lotacao=lotacao_username,estado_lotacao=estado_lotacao,descricao='Removeu {} dos usuários autorizados.'.format(str(username).upper()))
+        _insertOpLog(usuario=removido_por, ip=ip, lotacao=lotacao_username,estado_lotacao=estado_lotacao,descricao='Removeu {}({}) dos usuários autorizados.'.format(str(username).upper(), str(lotacao).upper()))
         return True
     else:
         return False
