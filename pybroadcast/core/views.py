@@ -11,7 +11,10 @@ def home(request):
         return render(request, 'core/login.html', )
     else:
         remote_addr = request.META['REMOTE_ADDR']
-        nome_completo = request.session['nome_completo']
+        try:
+            nome_completo = request.session['nome_completo']
+        except KeyError:
+            nome_completo = request.user
         return render(request, 'core/home.html', {'nome_completo': nome_completo, 'remote_addr': remote_addr})
 
 
