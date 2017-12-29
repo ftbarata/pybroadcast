@@ -98,18 +98,23 @@ def historico(request):
 def getReverseDns(request):
     remote_addr = request.META['REMOTE_ADDR']
     if len(remote_addr) <= 15:
+        octets_list = remote_addr.split('.')
         prefix = ''
-        dotcount = 0
-        for char in remote_addr:
-            if dotcount < 3:
-                if char == '.':
-                    dotcount += 1
-                if (char == '1' or char == '2') and dotcount == 2:
-                    prefix += '0'
-                else:
-                    prefix += char
+        position = 0
+        for i in octets_list:
+            if position < 2:
+                prefix += i + '.'
+                position += 1
+        print(prefix)
 
+        if octets_list[2] == '1' or octets_list[2] == '2':
+            prefix += '0.'
+        else:
+            prefix += octets_list[2] + '.'
         final_ip = prefix + '8'
+
+        print(final_ip)
+
         reverse = os.popen('host -t txt {}'.format(final_ip)).read()
         if 'NXDOMAIN' not in reverse:
             reverse_ip_list = str(reverse).split(' ')
