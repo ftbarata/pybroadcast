@@ -103,13 +103,17 @@ def getReverseDns(request):
             if dotcount < 3:
                 if char == '.':
                     dotcount += 1
-                prefix += char
-        final_ip = prefix + '8'
+                if char == '1' and dotcount == 2:
+                    prefix += '0'
+                else:
+                    prefix += char
 
+        final_ip = prefix + '8'
         reverse = os.popen('host -t txt {}'.format(final_ip)).read()
         if 'NXDOMAIN' not in reverse:
             reverse_ip_list = str(reverse).split(' ')
-            reverse = reverse_ip_list[len(reverse_ip_list) - 1]
+            reverse = str(reverse_ip_list[len(reverse_ip_list) - 1]).lower()
+            print(reverse)
             return render(request, 'core/reversedns.html', {'result': reverse.replace('.conab.gov.br.', '')})
         else:
             return render(request, 'core/reversedns.html', {'result': 'df'})
