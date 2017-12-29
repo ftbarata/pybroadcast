@@ -5,10 +5,10 @@ import urllib.request as request
 import tkinter as tk
 import tkinter.messagebox as tkMessageBox
 
-URL_GET_REVERSE_DNS='http://10.1.0.127/reversedns'
+URL_GET_REVERSE_DNS='http://*****/reversedns'
 SERVER='10.1.0.127'
-USERNAME='pybroadcast'
-PASSWORD='!#@-pybroadcast'
+USERNAME='://*****'
+PASSWORD='://*****'
 
 # def getVmLinuxAddress():
 #     hostname = socket.gethostname()
