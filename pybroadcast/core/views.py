@@ -141,6 +141,9 @@ def configuracoes(request):
         if request.method == 'GET':
             return render(request, 'core/configuracoes.html', {'remote_addr': remote_addr, 'nome_completo': nome_completo, 'usuarios_autorizados': usuarios_autorizados})
         else:
+            if UsuariosAutorizados.objects.all().filter(usuario=request.POST['usuario']).exists():
+                return render(request, 'core/configuracoes.html',{'usuarios_autorizados': usuarios_autorizados, 'remote_addr': remote_addr,'nome_completo': nome_completo,'alert_message': 'Usuário {} já possui autorização.'.format(request.POST['usuario'].upper())})
+
             usuario = request.POST['usuario']
             estado_lotacao_new_user = str(_get_ldap_user_attrs_as_dict_of_lists(username=usuario, attr_list=['st'])['st'][0]).upper()
             adicionado_por = request.user
