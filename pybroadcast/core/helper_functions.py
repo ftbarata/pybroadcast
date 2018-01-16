@@ -52,7 +52,12 @@ def logout_user(request):
 
 
 def _sendHistory(usuario, ip, lotacao, estado_lotacao, titulo_mensagem,mensagem):
-    SendMessageHistory.objects.create(usuario=usuario,ip=ip, lotacao=lotacao, estado_lotacao=estado_lotacao,titulo_mensagem=titulo_mensagem, conteudo_mensagem=mensagem)
+    if len(mensagem.split('[$$]')) == 2:
+        SendMessageHistory.objects.create(usuario=usuario,ip=ip, lotacao=lotacao, estado_lotacao=estado_lotacao,titulo_mensagem=titulo_mensagem, conteudo_mensagem=mensagem)
+    elif len(mensagem.split('[$$]')) > 2:
+        body = mensagem.split('[$$]')[1]
+        SendMessageHistory.objects.create(usuario=usuario, ip=ip, lotacao=lotacao, estado_lotacao=estado_lotacao,titulo_mensagem=titulo_mensagem, conteudo_mensagem=body)
+
 
 
 def _getUserFromSessionId(request):

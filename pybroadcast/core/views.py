@@ -32,7 +32,7 @@ def login(request):
                 else:
                     return render(request, 'core/home.html',{'nome_completo': nome_completo, 'remote_addr': remote_addr, 'alert_message': 'Atenção, você não tem permissão para enviar mensagem e editar autorizados'})
             else:
-                return render(request, 'core/login.html', {'status_message': 'Login ou senha incorreta.'})
+                return render(request, 'core/login.html', {'alert_message': 'Login ou senha incorreta.'})
         else:
             return render(request, 'core/home.html')
     else:
@@ -81,7 +81,7 @@ def sendMessage(request):
         else:
             return render(request, 'core/home.html',{'nome_completo': nome_completo, 'remote_addr': remote_addr, 'alert_message': 'Você não tem permissão para enviar mensagens.'})
     else:
-        return render(request, 'core/login.html', {'status_message': 'Acesso negado. Faça o login primeiro.'})
+        return render(request, 'core/login.html', {'alert_message': 'Acesso negado. Faça o login primeiro.'})
 
 
 def historico(request):
@@ -95,7 +95,7 @@ def historico(request):
 
         return render(request, 'core/historico.html', {'history_queryset': history_queryset, 'nome_completo':nome_completo, 'lotacao': lotacao, 'operation_history': operation_queryset, 'remote_addr': remote_addr})
     else:
-        return render(request, 'core/login.html', {'status_message': 'Acesso negado. Faça o login primeiro.'})
+        return render(request, 'core/login.html', {'alert_message': 'Acesso negado. Faça o login primeiro.'})
 
 
 def getReverseDns(request):
@@ -166,7 +166,7 @@ def configuracoes(request):
                 return render(request, 'core/configuracoes.html',{'usuarios_autorizados': usuarios_autorizados, 'remote_addr': remote_addr,'nome_completo': nome_completo, 'alert_message':'Você não tem permissão para editar autorizados.'})
 
     else:
-        return render(request, 'core/login.html', {'status_message': 'Acesso negado. Faça o login primeiro.'})
+        return render(request, 'core/login.html', {'alert_message': 'Acesso negado. Faça o login primeiro.'})
 
 
 def deleteAuthorizedUser(request, id):
@@ -187,7 +187,7 @@ def deleteAuthorizedUser(request, id):
         else:
             return render(request, 'core/configuracoes.html',{'remote_addr': remote_addr, 'nome_completo': nome_completo,'usuarios_autorizados': usuarios_autorizados, 'status_message': 'Usuário removido.', 'alert_message':'Você não tem permissão para editar usuários autorizados.'})
     else:
-        return render(request, 'core/login.html', {'status_message': 'Acesso negado. Faça o login primeiro.'})
+        return render(request, 'core/login.html', {'alert_message': 'Acesso negado. Faça o login primeiro.'})
 
 
 def ajaxRequestLdapUser(request, username):
